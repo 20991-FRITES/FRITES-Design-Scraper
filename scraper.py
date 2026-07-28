@@ -35,9 +35,15 @@ commonly_used = [
     "1516-4008-*",  # 8mm REX Standoffs
     "2812-0004-0007",  # M4 Nylock nut
     "2811-0004-0007",  # M4 Hex nut
-    "1611-0514-4008"  # REX Flanged Bearing
-    "1201-0043-0002"  # Quad block mount
-    "1205-0001-0005"  # Dual block mount
+    "1611-0514-4008",  # REX Flanged Bearing
+    "1201-0043-0002",  # Quad block mount
+    "1205-0001-0005",  # Dual block mount
+    "3625-0202-0104",  # Mecanum wheels
+    "1309-0016-4008", # Sonic hub
+    "2106-4008*",    # REX Shafting stainless steel
+    "3217-0001-2501", # Compact ServoBlock
+    "1802-0043-0001", #1802 Series Servo Frame
+    "1908-0025-0032", # 1908 Series Servo Hub
 ]
 
 MATERIAL_TABLE = {

@@ -12,7 +12,7 @@ BASE_URL = "https://www.gobilda.com"
 
 session = requests_cache.CachedSession(
     "gobilda_cache",
-    expire_after=None,   # cache forever
+    expire_after=None,  # cache forever
 )
 seen_products = set()
 
@@ -21,20 +21,20 @@ products_completed = 0
 products_total = 0
 
 commonly_used = [
-    "1120.field2<=12", # U channel up to 12 holes
-    "1121.field2<=12", # U channel low-side up to 12 holes
-    "1143.field2<=12", # U channel mini up to 12 holes
-    "5203-2402*",      # Yellow Jacket planetary gearbox motors (most common ratios and sizes, 24mm REX shaft)
-    "2800-0004*",      # M4 Socket head screws
-    "2802-0004*",      # M4 Button head screws
-    "2804-0004*",      # M4 Low profile screws,
-    "2000-0025-0002",   # Torque servo
-    "2000-0025-0003",   # Speed servo
-    "2000-0025-0004",   # Super speed servo
-    "1522-0010*",      # 8mm ID x 10mm OD Spacers
-    "1516-4008-*",    # 8mm REX Standoffs
-    "2812-0004-0007", # M4 Nylock nut
-    "2811-0004-0007", # M4 Hex nut
+    "1120.field2<=12",  # U channel up to 12 holes
+    "1121.field2<=12",  # U channel low-side up to 12 holes
+    "1143.field2<=12",  # U channel mini up to 12 holes
+    "5203-2402*",  # Yellow Jacket planetary gearbox motors (most common ratios and sizes, 24mm REX shaft)
+    "2800-0004*",  # M4 Socket head screws
+    "2802-0004*",  # M4 Button head screws
+    "2804-0004*",  # M4 Low profile screws,
+    "2000-0025-0002",  # Torque servo
+    "2000-0025-0003",  # Speed servo
+    "2000-0025-0004",  # Super speed servo
+    "1522-0010*",  # 8mm ID x 10mm OD Spacers
+    "1516-4008-*",  # 8mm REX Standoffs
+    "2812-0004-0007",  # M4 Nylock nut
+    "2811-0004-0007",  # M4 Hex nut
     "1611-0514-4008"  # REX Flanged Bearing
     "1201-0043-0002"  # Quad block mount
     "1205-0001-0005"  # Dual block mount
@@ -71,6 +71,15 @@ MATERIAL_TABLE = {
     "Polycarbonate U-Wheel with High-Carbon Steel Bearings": "Polycarbonate",
 }
 
+FINISH_TABLE = {
+    "Black Oxide":      r"metal\steel\burnished steel.p2m",
+    "Black Zinc-Plated":r"metal\zinc\burnished zinc.p2m",
+    "Clear Anodized":   r"metal\aluminum\satin finish aluminum.p2m",
+    "Steel":            r"metal\steel\matte steel.p2m",
+    "Titanium Nitride": r"metal\gold\matte gold.p2m",
+    "Zinc Plated":      r"metal\zinc\matte zinc.p2m",
+    "Zinc-Plated":      r"metal\zinc\matte zinc.p2m",
+}
 
 def is_commonly_used(sku):
     if sku is None:
@@ -91,6 +100,7 @@ def is_commonly_used(sku):
                     return True
 
     return False
+
 
 def scrape_page(url):
     print(f"Scraping {url}")
@@ -148,6 +158,7 @@ def scrape_page(url):
                 "commonly_used": is_commonly_used(sku),
                 "weight": None,
                 "material": None,
+                "finish": None,
             })
     else:
         for product in soup.select(".product"):
@@ -177,7 +188,7 @@ def scrape_page(url):
             sku = sku_el.get_text(strip=True) if sku_el else None
             if sku is None and title_text == "M4 Lock Nut":
                 # set sku to title_text so downstream logic treats it as a product
-                sku = title_text
+                sku = "2812-0004-0007"  # Nylock nut is weird :/
 
             key = sku if sku else link
 
@@ -198,6 +209,7 @@ def scrape_page(url):
                 "commonly_used": is_commonly_used(sku),
                 "weight": None,
                 "material": None,
+                "finish": None
             })
 
             # Only treat the link as a child/category when we don't consider it a product.
@@ -262,6 +274,10 @@ def fetch_product_details(product):
         product["material"] = specs.get("Material")
         if not product["material"] is None:
             product["material"] = MATERIAL_TABLE[specs.get("Material")]
+
+        product["finish"] = specs.get("Finish")
+        if not product["finish"] is None:
+            product["finish"] = FINISH_TABLE[specs.get("Finish")]
     except Exception as e:
         print(f"\nFailed: {product['link']} - {e}")
 
@@ -335,9 +351,11 @@ def build_tree(url, pages, visited=None):
                 "commonly_used": product["commonly_used"],
                 "weight": product["weight"],
                 "material": product["material"],
+                "finish": product["finish"],
             })
 
     return node
+
 
 def prune_empty_categories(node):
     """
@@ -362,6 +380,7 @@ def prune_empty_categories(node):
         return None
 
     return node
+
 
 roots = [
     ("structure", "/structure"),

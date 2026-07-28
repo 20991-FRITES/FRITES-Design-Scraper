@@ -2,7 +2,7 @@ import json
 
 def collect_materials(node, materials):
     if isinstance(node, dict):
-        material = node.get("material")
+        material = node.get("finish")
         if material:
             materials.add(material.strip())
 

@@ -72,13 +72,13 @@ MATERIAL_TABLE = {
 }
 
 FINISH_TABLE = {
-    "Black Oxide":      r"metal\steel\burnished steel.p2m",
-    "Black Zinc-Plated":r"metal\zinc\burnished zinc.p2m",
+    "Black Oxide":      r"plastic\High Gloss\black high gloss plastic.p2m",
+    "Black Zinc-Plated":r"plastic\High Gloss\black high gloss plastic.p2m",
     "Clear Anodized":   r"metal\aluminum\satin finish aluminum.p2m",
-    "Steel":            r"metal\steel\matte steel.p2m",
-    "Titanium Nitride": r"metal\gold\matte gold.p2m",
-    "Zinc Plated":      r"metal\zinc\matte zinc.p2m",
-    "Zinc-Plated":      r"metal\zinc\matte zinc.p2m",
+    "Steel":            r"metal\steel\polished steel.p2m",
+    "Titanium Nitride": r"metal\zinc\satin finish zinc.p2m",
+    "Zinc Plated":      r"metal\zinc\satin finish zinc.p2m",
+    "Zinc-Plated":      r"metal\zinc\satin finish zinc.p2m",
 }
 
 def is_commonly_used(sku):

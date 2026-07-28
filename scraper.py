@@ -365,9 +365,9 @@ def prune_empty_categories(node):
 
 roots = [
     ("structure", "/structure"),
-    # ("motion", "/motion"),
-    # ("electronics", "/electronics"),
-    # ("hardware", "/hardware"),
+    ("motion", "/motion"),
+    ("electronics", "/electronics"),
+    ("hardware", "/hardware"),
 ]
 
 children = []

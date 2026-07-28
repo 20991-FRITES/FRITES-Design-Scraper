@@ -1,11 +1,51 @@
 name: Scrape
 
 on:
-  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+
+permissions:
+  contents: write
 
 jobs:
-  hello:
+  scrape:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "Hello GitHub Actions!"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - run: pip install -r requirements.txt
+
+      - run: chmod +x run_all.sh
+
+      - run: ./run_all.sh
+
+      - run: |
+          mkdir public
+          cp full_structure.json public/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: scrape
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

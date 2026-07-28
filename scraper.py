@@ -105,6 +105,9 @@ def is_commonly_used(sku):
                 if int(parts[1]) <= limit:
                     return True
 
+        elif sku == pattern:
+            return True
+
     return False
 
 

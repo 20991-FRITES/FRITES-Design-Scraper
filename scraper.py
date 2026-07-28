@@ -40,6 +40,37 @@ commonly_used = [
     "1205-0001-0005"  # Dual block mount
 ]
 
+MATERIAL_TABLE = {
+    # Plastics
+    "ABS Plastic": "ABS",
+    "Acetal Plastic": "Acetal",
+    "Plastic": "ABS",  # Generic fallback
+    "Polycarbonate Plastic": "Polycarbonate",
+
+    # Metals
+    "Aluminum": "6061 Alloy",
+    "Brass": "Brass",
+    "Bronze": "Bronze",
+    "Steel": "Plain Carbon Steel",
+    "Stainless Steel": "AISI 304",
+
+    # Finishes (ignore coating, use base material)
+    "Clear Anodized": "6061 Alloy",
+    "Zinc-Plated": "Plain Carbon Steel",
+
+    # Composites (closest available)
+    "Fiber-Reinforced Plastic": "Glass Fiber Reinforced Plastic",
+    "Fiber-Reinforced Acetal": "Acetal",
+
+    # Assemblies (choose dominant body material)
+    "Plastic with Brass Inserts": "ABS",
+    "Plastic with Brass Threaded Inserts": "ABS",
+    "Plastic with High-Carbon Steel Bearings": "ABS",
+    "Plastic with Stainless Steel Bearings": "ABS",
+    "Fiber-Reinforced Plastic Hinge Blocks, Zinc-Plated Steel Hardware": "Glass Fiber Reinforced Plastic",
+    "Polycarbonate U-Wheel with High-Carbon Steel Bearings": "Polycarbonate",
+}
+
 
 def is_commonly_used(sku):
     if sku is None:
@@ -114,7 +145,9 @@ def scrape_page(url):
                 "image_url": None,
                 "step_file": None,
                 "skip": False,
-                "commonly_used": is_commonly_used(sku)
+                "commonly_used": is_commonly_used(sku),
+                "weight": None,
+                "material": None,
             })
     else:
         for product in soup.select(".product"):
@@ -162,7 +195,9 @@ def scrape_page(url):
                 "image_url": image_url,
                 "step_file": None,
                 "skip": False,
-                "commonly_used": is_commonly_used(sku)
+                "commonly_used": is_commonly_used(sku),
+                "weight": None,
+                "material": None,
             })
 
             # Only treat the link as a child/category when we don't consider it a product.
@@ -207,6 +242,26 @@ def fetch_product_details(product):
                 image_url = BASE_URL + image_url
             product["image_url"] = image_url
 
+        specs = {}
+
+        table = soup.select_one("table.product-specsTable")
+        if table:
+            for row in table.select("tr.product-specsTable-row"):
+                key = row.select_one("th.product-specsTable-headerCell")
+                value = row.select_one("td.product-specsTable-cell")
+
+                if key and value:
+                    specs[key.get_text(strip=True)] = value.get_text(strip=True)
+
+        product["weight"] = specs.get("Weight")
+        if not product["weight"] is None:
+            product["weight"] = product["weight"].replace(" Each", "")
+            product["weight"] = product["weight"].replace(" each", "")
+            product["weight"] = product["weight"].replace(" each with included hardware", "")
+
+        product["material"] = specs.get("Material")
+        if not product["material"] is None:
+            product["material"] = MATERIAL_TABLE[specs.get("Material")]
     except Exception as e:
         print(f"\nFailed: {product['link']} - {e}")
 
@@ -277,7 +332,9 @@ def build_tree(url, pages, visited=None):
                 "url": product["link"],
                 "image_url": product["image_url"],
                 "step_file": product["step_file"],
-                "commonly_used": product["commonly_used"]
+                "commonly_used": product["commonly_used"],
+                "weight": product["weight"],
+                "material": product["material"],
             })
 
     return node
@@ -308,9 +365,9 @@ def prune_empty_categories(node):
 
 roots = [
     ("structure", "/structure"),
-    ("motion", "/motion"),
-    ("electronics", "/electronics"),
-    ("hardware", "/hardware"),
+    # ("motion", "/motion"),
+    # ("electronics", "/electronics"),
+    # ("hardware", "/hardware"),
 ]
 
 children = []

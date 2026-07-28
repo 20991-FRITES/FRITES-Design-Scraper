@@ -36,6 +36,11 @@ BANNED_TITLE_KEYWORDS = {
     "Repair Service",
 }
 
+COMMONLY_USED = {
+    "REV-31-1595",
+    "REV-31-1153"
+}
+
 
 def parse_menu_item(li):
     """Parse a <li> into a tree node."""
@@ -136,7 +141,7 @@ def scrape_product_list(url):
                 "url": product_url,
                 "image_url": image_url,
                 "step_file": subproducts[0]["step_file_url"],
-                "commonly_used": False
+                "commonly_used": True if subproducts[0]["sku"] in COMMONLY_USED else False
             })
             continue
         elif len(subproducts) >= 2:
@@ -151,7 +156,7 @@ def scrape_product_list(url):
                     "url": product_url,
                     "image_url": image_url,
                     "step_file": subproduct["step_file_url"],
-                    "commonly_used": False
+                    "commonly_used": True if subproduct["sku"] in COMMONLY_USED else False
                 })
             output["children"].append({
                 "url": product_url,
